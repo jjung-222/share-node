@@ -1,12 +1,6 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, { useState, useEffect } from 'react';
+import type { PropsWithChildren } from 'react';
+import { GoogleSignin, GoogleSigninButton, statusCodes, SignInSuccessResponse, CancelledResponse } from '@react-native-google-signin/google-signin';
 import {
   SafeAreaView,
   ScrollView,
@@ -15,6 +9,8 @@ import {
   Text,
   useColorScheme,
   View,
+  Alert,
+  Button,
 } from 'react-native';
 
 import {
@@ -25,11 +21,13 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
+const WEB_CLIENT_ID = '249896429943-u2m4akbsrhuhhfp7h68479lk9fbdqe2c.apps.googleusercontent.com'; // 자신의 웹 클라이언트 ID로 변경
+
 type SectionProps = PropsWithChildren<{
   title: string;
 }>;
 
-function Section({children, title}: SectionProps): React.JSX.Element {
+function Section({ children, title }: SectionProps): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
   return (
     <View style={styles.sectionContainer}>
@@ -62,6 +60,58 @@ function App(): React.JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  useEffect(() => {
+    configureGoogleSign();
+  }, []);
+
+  function configureGoogleSign() {
+    GoogleSignin.configure({
+      webClientId: '249896429943-u2m4akbsrhuhhfp7h68479lk9fbdqe2c.apps.googleusercontent.com', // 웹 클라이언트 ID
+      iosClientId: '249896429943-ca8uo23ulj1q6acgktre3nnu59r9jq3i.apps.googleusercontent.com', // iOS 클라이언트 ID
+      offlineAccess: false,
+    });
+  }
+
+  const [userInfo, setUserInfo] = useState<SignInSuccessResponse | CancelledResponse | null>(null);  
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [error, setError] = useState(null);
+
+  const signOut = async () => {
+    try {
+      await GoogleSignin.revokeAccess();
+      await GoogleSignin.signOut();
+      setIsLoggedIn(false);
+    } catch (error) {
+      Alert.alert('Something else went wrong... ', error.toString());
+    }
+  };
+
+  const LogInWithGoogle = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
+  
+      if (response.type === 'success') {
+        const userInfoResponse: SignInSuccessResponse = response;
+        setUserInfo(userInfoResponse);
+        setIsLoggedIn(true);
+        setError(null);
+      } else if (response.type === 'cancelled') {
+        const cancelledResponse: CancelledResponse = response;
+        setUserInfo(cancelledResponse);
+        Alert.alert('Process Cancelled');
+      }
+    } catch (error: any) { // error 타입을 any로 지정
+      if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        Alert.alert("Play services are not available");
+      } else {
+        Alert.alert('Something else went wrong... ', error.toString());
+        setError(error);
+      }
+    }
+  };
+  
+
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar
@@ -77,8 +127,19 @@ function App(): React.JSX.Element {
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
           <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
+            <GoogleSigninButton
+              style={styles.signInButton}
+              size={GoogleSigninButton.Size.Wide}
+              color={GoogleSigninButton.Color.Dark}
+              onPress={() => LogInWithGoogle()}
+            />
+            <View style={styles.status}>
+              {isLoggedIn === false ? (
+                <Text style={styles.loggedinMessage}>You must sign in!</Text>
+              ) : (
+                <Button onPress={() => signOut()} title='Sign out' color='#332211' />
+              )}
+            </View>
           </Section>
           <Section title="See Your Changes">
             <ReloadInstructions />
@@ -112,6 +173,19 @@ const styles = StyleSheet.create({
   },
   highlight: {
     fontWeight: '700',
+  },
+  signInButton: {
+    width: 200,
+    height: 50,
+  },
+  status: { // status 스타일 추가
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  loggedinMessage: { // loggedinMessage 스타일 추가
+    fontSize: 16,
+    color: 'red', // 메시지 색상 설정 (예: 빨간색)
+    marginTop: 10,
   },
 });
 
