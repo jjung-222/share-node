@@ -178,13 +178,13 @@ const styles = StyleSheet.create({
     width: 200,
     height: 50,
   },
-  status: { // status 스타일 추가
+  status: { 
     marginTop: 20,
     alignItems: 'center',
   },
-  loggedinMessage: { // loggedinMessage 스타일 추가
+  loggedinMessage: { 
     fontSize: 16,
-    color: 'red', // 메시지 색상 설정 (예: 빨간색)
+    color: 'red', 
     marginTop: 10,
   },
 });
