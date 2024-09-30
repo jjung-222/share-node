@@ -28,6 +28,48 @@ import NaverLogin, {
   GetProfileResponse,
 } from '@react-native-seoul/naver-login';
 
+import {NavigationContainer} from '@react-navigation/native';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+
+import { enableScreens } from 'react-native-screens';
+
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+
+const Tab = createBottomTabNavigator();
+
+function CalenderScreen() {
+  return (
+    <View>
+      <Text>Calender</Text>
+    </View>
+  );
+}
+
+function BlogScreen() {
+  return (
+    <View>
+      <Text>Blog</Text>
+    </View>
+  );
+}
+
+function MyPageScreen() {
+  return (
+    <View>
+      <Text>MyPage</Text>
+    </View>
+  );
+}
+
+function MessageScreen() {
+  return (
+    <View>
+      <Text>Message</Text>
+    </View>
+  );
+}
+
 // 네이버 API 키 값 설정
 const consumerKey = 'gu756P_YZBUNtqaqwohM'; // 네이버에서 발급받은 consumerKey
 const consumerSecret = '8GeElHUit2'; // 네이버에서 발급받은 consumerSecret
@@ -67,6 +109,8 @@ function Section({ children, title }: SectionProps): React.JSX.Element {
     </View>
   );
 }
+
+enableScreens();
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -235,23 +279,23 @@ function App(): React.JSX.Element {
             </View>
           </Section>
           <Section title="See Your Changes">
-          <TouchableOpacity style={styles.naverLoginButton} onPress={login}>
+            <TouchableOpacity style={styles.naverLoginButton} onPress={login}>
               <Image source={naverLogo} style={styles.naverLogo} />
             </TouchableOpacity>
-        <Gap />
-        <Button title={'Logout'} onPress={logout} />
-        <Gap />
-        {success ? (
-          <>
-            <Button title="Get Profile" onPress={getProfile} />
             <Gap />
-            <Button title="Delete Token" onPress={deleteToken} />
+            <Button title={'Logout'} onPress={logout} />
             <Gap />
-            <ResponseJsonText name={'Success'} json={success} />
-          </>
-        ) : null}
-        {failure ? <ResponseJsonText name={'Failure'} json={failure} /> : null}
-        {getProfileRes ? <ResponseJsonText name={'GetProfile'} json={getProfileRes} /> : null}
+            {success ? (
+              <>
+                <Button title="Get Profile" onPress={getProfile} />
+                <Gap />
+                <Button title="Delete Token" onPress={deleteToken} />
+                <Gap />
+                <ResponseJsonText name={'Success'} json={success} />
+              </>
+            ) : null}
+            {failure ? <ResponseJsonText name={'Failure'} json={failure} /> : null}
+            {getProfileRes ? <ResponseJsonText name={'GetProfile'} json={getProfileRes} /> : null}
           </Section>
           <Section title="Debug">
             <DebugInstructions />
@@ -262,8 +306,60 @@ function App(): React.JSX.Element {
           <LearnMoreLinks />
         </View>
       </ScrollView>
+      <NavigationContainer>
+      <Tab.Navigator initialRouteName="Calender" screenOptions={{ tabBarStyle: styles.tabBarStyle }}>
+        <Tab.Screen
+          name="Calender"
+          component={CalenderScreen}
+          options={{
+            title: '',
+            tabBarIcon: ({ color, size }) => (
+              <View style={styles.iconContainer}>
+                <Icon name="event" color={color} size={size} />
+              </View>
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Blog"
+          component={BlogScreen}
+          options={{
+            title: '',
+            tabBarIcon: ({ color, size }) => (
+              <View style={styles.iconContainer}>
+                <Icon name="article" color={color} size={size} />
+              </View>
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Message"
+          component={MessageScreen}
+          options={{
+            title: '',
+            tabBarIcon: ({ color, size }) => (
+              <View style={styles.iconContainer}>
+                <Icon name="message" color={color} size={size} />
+              </View>
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="MyPage"
+          component={MyPageScreen}
+          options={{
+            title: '',
+            tabBarIcon: ({ color, size }) => (
+              <View style={styles.iconContainer}>
+                <Icon name="account-circle" color={color} size={size} />
+              </View>
+            ),
+          }}
+        />
+      </Tab.Navigator>
+    </NavigationContainer>
     </SafeAreaView>
-  );
+  );  
 }
 
 // 간격을 위한 컴포넌트
@@ -317,6 +413,20 @@ const styles = StyleSheet.create({
   naverLogo: {
     width: 200,  // 로고의 너비
     height: 50,  // 로고의 높이
+  },
+  tabBarStyle: {
+    position: 'absolute',
+    height: 60,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    elevation: 0, // Android의 그림자 없애기
+    backgroundColor: Colors.white, // 색상 설정
+  },
+  iconContainer: {
+    left: 10,
+    justifyContent: 'center', // 중앙 정렬
+    alignItems: 'center', // 중앙 정렬
   },
 });
 
