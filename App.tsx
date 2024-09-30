@@ -21,6 +21,17 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
+import NaverLogin, {
+  NaverLoginResponse,
+  GetProfileResponse,
+} from '@react-native-seoul/naver-login';
+
+// 네이버 API 키 값 설정
+const consumerKey = 'gu756P_YZBUNtqaqwohM'; // 네이버에서 발급받은 consumerKey
+const consumerSecret = '_8GeElHUit2'; // 네이버에서 발급받은 consumerSecret
+const appName = 'Hello';
+const serviceUrlSchemeIOS = 'com.shareNode'; // 네이버 개발자 센터에서 설정한 URL Scheme
+
 const WEB_CLIENT_ID = '249896429943-u2m4akbsrhuhhfp7h68479lk9fbdqe2c.apps.googleusercontent.com'; // 자신의 웹 클라이언트 ID로 변경
 
 type SectionProps = PropsWithChildren<{
@@ -75,6 +86,84 @@ function App(): React.JSX.Element {
   const [userInfo, setUserInfo] = useState<SignInSuccessResponse | CancelledResponse | null>(null);  
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [error, setError] = useState(null);
+
+  //naver
+  const [success, setSuccessResponse] = useState<NaverLoginResponse['successResponse']>();
+  const [failure, setFailureResponse] = useState<NaverLoginResponse['failureResponse']>();
+  const [getProfileRes, setGetProfileRes] = useState<GetProfileResponse>();
+
+  useEffect(() => {
+    NaverLogin.initialize({
+      appName,
+      consumerKey,
+      consumerSecret,
+      serviceUrlSchemeIOS,
+    });
+  }, []);
+
+  // 네이버 로그인 함수
+  const login = async () => {
+    try {
+      // NaverLogin.login() 메서드를 인수 없이 호출
+      const response: NaverLoginResponse = await NaverLogin.login();
+  
+      console.log('Login response:', response); // 응답 구조 확인
+  
+      // 응답의 isSuccess 속성으로 로그인 결과 처리
+      if (response.isSuccess) {
+        setSuccessResponse(response.successResponse); // 성공한 경우 successResponse를 사용
+        setFailureResponse(undefined);
+      } else {
+        setFailureResponse(response.failureResponse); // 실패한 경우 failureResponse를 사용
+        setSuccessResponse(undefined);
+      }
+    } catch (error) {
+      console.error("Login error:", error); // 에러 로깅
+    }
+  };
+  
+  
+
+
+  // 네이버 로그아웃 함수
+  const logout = async () => {
+    try {
+      await NaverLogin.logout();
+      setSuccessResponse(undefined);
+      setFailureResponse(undefined);
+      setGetProfileRes(undefined);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // 프로필 가져오기 함수
+  const getProfile = async () => {
+    if (!success || !success.accessToken) {
+      console.error('No access token available');
+      return;
+    }
+
+    try {
+      const profileResult = await NaverLogin.getProfile(success.accessToken);
+      setGetProfileRes(profileResult);
+    } catch (e) {
+      console.error('Failed to get profile:', e);
+      setGetProfileRes(undefined);
+    }
+  };
+
+  // 토큰 삭제 함수
+  const deleteToken = async () => {
+    try {
+      await NaverLogin.deleteToken();
+      setSuccessResponse(undefined);
+      setFailureResponse(undefined);
+      setGetProfileRes(undefined);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const signOut = async () => {
     try {
@@ -142,7 +231,21 @@ function App(): React.JSX.Element {
             </View>
           </Section>
           <Section title="See Your Changes">
-            <ReloadInstructions />
+          <Button title={'Login'} onPress={login} />
+        <Gap />
+        <Button title={'Logout'} onPress={logout} />
+        <Gap />
+        {success ? (
+          <>
+            <Button title="Get Profile" onPress={getProfile} />
+            <Gap />
+            <Button title="Delete Token" onPress={deleteToken} />
+            <Gap />
+            <ResponseJsonText name={'Success'} json={success} />
+          </>
+        ) : null}
+        {failure ? <ResponseJsonText name={'Failure'} json={failure} /> : null}
+        {getProfileRes ? <ResponseJsonText name={'GetProfile'} json={getProfileRes} /> : null}
           </Section>
           <Section title="Debug">
             <DebugInstructions />
@@ -156,6 +259,19 @@ function App(): React.JSX.Element {
     </SafeAreaView>
   );
 }
+
+// 간격을 위한 컴포넌트
+const Gap = () => <View style={{marginTop: 24}} />;
+
+// JSON 데이터를 출력하는 컴포넌트
+const ResponseJsonText = ({json = {}, name}: {json?: object; name: string}) => (
+  <View style={{padding: 12, borderRadius: 16, borderWidth: 1, backgroundColor: '#242c3d'}}>
+    <Text style={{fontSize: 20, fontWeight: 'bold', color: 'white'}}>{name}</Text>
+    <Text style={{color: 'white', fontSize: 13, lineHeight: 20}}>
+      {JSON.stringify(json, null, 4)}
+    </Text>
+  </View>
+);
 
 const styles = StyleSheet.create({
   sectionContainer: {
