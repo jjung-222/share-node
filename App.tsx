@@ -45,7 +45,8 @@ const consumerSecret = '8GeElHUit2'; // 네이버에서 발급받은 consumerSec
 const appName = 'shareNode';
 const serviceUrlSchemeIOS = 'com.shareNode'; // 네이버 개발자 센터에서 설정한 URL Scheme
 
-const naverLogo = require('./src/imgs/NaverLogin/loginFull.png'); // 네이버 로고 이미지 경로
+const naverLogin = require('./src/imgs/NaverLogin/loginSimple.png'); // 네이버 로고 이미지 경로
+const naverLogout = require('./src/imgs/NaverLogin/logoutShort.png'); // 네이버 로고 이미지 경로
 
 const WEB_CLIENT_ID = '249896429943-u2m4akbsrhuhhfp7h68479lk9fbdqe2c.apps.googleusercontent.com'; // 자신의 웹 클라이언트 ID로 변경
 
@@ -243,7 +244,7 @@ function App(): React.JSX.Element {
             style={{
               backgroundColor: isDarkMode ? Colors.black : Colors.white,
             }}>
-            <Section title="Step One">
+            <Section title="구글로그인">
               <GoogleSigninButton
                 style={styles.signInButton}
                 size={GoogleSigninButton.Size.Wide}
@@ -258,12 +259,10 @@ function App(): React.JSX.Element {
                 )}
               </View>
             </Section>
-            <Section title="See Your Changes">
-              <TouchableOpacity style={styles.naverLoginButton} onPress={login}>
-                <Image source={naverLogo} style={styles.naverLogo} />
+            <Section title="네이버로그인">
+              <TouchableOpacity style={styles.naverLoginButton} onPress={success ? logout : login}>
+                <Image source={success ? naverLogout : naverLogin} style={styles.naverLogo} />
               </TouchableOpacity>
-              <Gap />
-              <Button title={'Logout'} onPress={logout} />
               <Gap />
               {success ? (
                 <>
@@ -277,13 +276,6 @@ function App(): React.JSX.Element {
               {failure ? <ResponseJsonText name={'Failure'} json={failure} /> : null}
               {getProfileRes ? <ResponseJsonText name={'GetProfile'} json={getProfileRes} /> : null}
             </Section>
-            <Section title="Debug">
-              <DebugInstructions />
-            </Section>
-            <Section title="Learn More">
-              Read the docs to discover what to do next:
-            </Section>
-            <LearnMoreLinks />
           </View>
         </ScrollView>
         
