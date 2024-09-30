@@ -11,6 +11,8 @@ import {
   View,
   Alert,
   Button,
+  TouchableOpacity,
+  Image,
 } from 'react-native';
 
 import {
@@ -28,9 +30,11 @@ import NaverLogin, {
 
 // 네이버 API 키 값 설정
 const consumerKey = 'gu756P_YZBUNtqaqwohM'; // 네이버에서 발급받은 consumerKey
-const consumerSecret = '_8GeElHUit2'; // 네이버에서 발급받은 consumerSecret
-const appName = 'Hello';
+const consumerSecret = '8GeElHUit2'; // 네이버에서 발급받은 consumerSecret
+const appName = 'shareNode';
 const serviceUrlSchemeIOS = 'com.shareNode'; // 네이버 개발자 센터에서 설정한 URL Scheme
+
+const naverLogo = require('./src/imgs/NaverLogin/loginFull.png'); // 네이버 로고 이미지 경로
 
 const WEB_CLIENT_ID = '249896429943-u2m4akbsrhuhhfp7h68479lk9fbdqe2c.apps.googleusercontent.com'; // 자신의 웹 클라이언트 ID로 변경
 
@@ -231,7 +235,9 @@ function App(): React.JSX.Element {
             </View>
           </Section>
           <Section title="See Your Changes">
-          <Button title={'Login'} onPress={login} />
+          <TouchableOpacity style={styles.naverLoginButton} onPress={login}>
+              <Image source={naverLogo} style={styles.naverLogo} />
+            </TouchableOpacity>
         <Gap />
         <Button title={'Logout'} onPress={logout} />
         <Gap />
@@ -302,6 +308,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'red', 
     marginTop: 10,
+  },
+  naverLoginButton: {
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  naverLogo: {
+    width: 200,  // 로고의 너비
+    height: 50,  // 로고의 높이
   },
 });
 
