@@ -35,40 +35,9 @@ import { enableScreens } from 'react-native-screens';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-
 const Tab = createBottomTabNavigator();
 
-function CalenderScreen() {
-  return (
-    <View>
-      <Text>Calender</Text>
-    </View>
-  );
-}
 
-function BlogScreen() {
-  return (
-    <View>
-      <Text>Blog</Text>
-    </View>
-  );
-}
-
-function MyPageScreen() {
-  return (
-    <View>
-      <Text>MyPage</Text>
-    </View>
-  );
-}
-
-function MessageScreen() {
-  return (
-    <View>
-      <Text>Message</Text>
-    </View>
-  );
-}
 
 // 네이버 API 키 값 설정
 const consumerKey = 'gu756P_YZBUNtqaqwohM'; // 네이버에서 발급받은 consumerKey
@@ -248,65 +217,91 @@ function App(): React.JSX.Element {
     }
   };
   
+  const CalenderScreen = () => {
+    return (
+      <View>
+        <Text>Calender</Text>
+      </View>
+    );
+  }
+  
+  const BlogScreen = () => {
+    return (
+      <View>
+        <Text>Blog</Text>
+      </View>
+    );
+  }
+  
+  const MyPageScreen = () => {
+    return (
+      <ScrollView
+          contentInsetAdjustmentBehavior="automatic"
+          style={backgroundStyle}>
+          {/* <Header /> */}
+          <View
+            style={{
+              backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            }}>
+            <Section title="Step One">
+              <GoogleSigninButton
+                style={styles.signInButton}
+                size={GoogleSigninButton.Size.Wide}
+                color={GoogleSigninButton.Color.Dark}
+                onPress={() => LogInWithGoogle()}
+              />
+              <View style={styles.status}>
+                {isLoggedIn === false ? (
+                  <Text style={styles.loggedinMessage}>You must sign in!</Text>
+                ) : (
+                  <Button onPress={() => signOut()} title='Sign out' color='#332211' />
+                )}
+              </View>
+            </Section>
+            <Section title="See Your Changes">
+              <TouchableOpacity style={styles.naverLoginButton} onPress={login}>
+                <Image source={naverLogo} style={styles.naverLogo} />
+              </TouchableOpacity>
+              <Gap />
+              <Button title={'Logout'} onPress={logout} />
+              <Gap />
+              {success ? (
+                <>
+                  <Button title="Get Profile" onPress={getProfile} />
+                  <Gap />
+                  <Button title="Delete Token" onPress={deleteToken} />
+                  <Gap />
+                  <ResponseJsonText name={'Success'} json={success} />
+                </>
+              ) : null}
+              {failure ? <ResponseJsonText name={'Failure'} json={failure} /> : null}
+              {getProfileRes ? <ResponseJsonText name={'GetProfile'} json={getProfileRes} /> : null}
+            </Section>
+            <Section title="Debug">
+              <DebugInstructions />
+            </Section>
+            <Section title="Learn More">
+              Read the docs to discover what to do next:
+            </Section>
+            <LearnMoreLinks />
+          </View>
+        </ScrollView>
+        
+    );
+  }
+  
+  const MessageScreen = () => {
+    return (
+      <View>
+        <Text>Message</Text>
+      </View>
+    );
+  }
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            <GoogleSigninButton
-              style={styles.signInButton}
-              size={GoogleSigninButton.Size.Wide}
-              color={GoogleSigninButton.Color.Dark}
-              onPress={() => LogInWithGoogle()}
-            />
-            <View style={styles.status}>
-              {isLoggedIn === false ? (
-                <Text style={styles.loggedinMessage}>You must sign in!</Text>
-              ) : (
-                <Button onPress={() => signOut()} title='Sign out' color='#332211' />
-              )}
-            </View>
-          </Section>
-          <Section title="See Your Changes">
-            <TouchableOpacity style={styles.naverLoginButton} onPress={login}>
-              <Image source={naverLogo} style={styles.naverLogo} />
-            </TouchableOpacity>
-            <Gap />
-            <Button title={'Logout'} onPress={logout} />
-            <Gap />
-            {success ? (
-              <>
-                <Button title="Get Profile" onPress={getProfile} />
-                <Gap />
-                <Button title="Delete Token" onPress={deleteToken} />
-                <Gap />
-                <ResponseJsonText name={'Success'} json={success} />
-              </>
-            ) : null}
-            {failure ? <ResponseJsonText name={'Failure'} json={failure} /> : null}
-            {getProfileRes ? <ResponseJsonText name={'GetProfile'} json={getProfileRes} /> : null}
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-      <NavigationContainer>
+    <NavigationContainer>
+
+      
       <Tab.Navigator initialRouteName="Calender" screenOptions={{ tabBarStyle: styles.tabBarStyle }}>
         <Tab.Screen
           name="Calender"
@@ -357,8 +352,8 @@ function App(): React.JSX.Element {
           }}
         />
       </Tab.Navigator>
+    
     </NavigationContainer>
-    </SafeAreaView>
   );  
 }
 
