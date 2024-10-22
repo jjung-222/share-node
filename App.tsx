@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { PropsWithChildren } from 'react';
 import { GoogleSignin, GoogleSigninButton, statusCodes, SignInSuccessResponse, CancelledResponse } from '@react-native-google-signin/google-signin';
 import {
@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
+import { WebView } from "react-native-webview";
 
 import {
   Colors,
@@ -100,6 +101,9 @@ function App(): React.JSX.Element {
       offlineAccess: false,
     });
   }
+
+  const webviewRef = useRef(null);
+
 
   const [userInfo, setUserInfo] = useState<SignInSuccessResponse | CancelledResponse | null>(null);  
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -217,12 +221,22 @@ function App(): React.JSX.Element {
       }
     }
   };
+
+  const postMessage = () => {
+    console.log("postMessage")
+  };
   
   const CalenderScreen = () => {
     return (
-      <View>
-        <Text>Calender</Text>
-      </View>
+      <WebView
+    ref={webviewRef}
+    source={{ uri: 'http://sharenode.shop' }}
+    onLoad={postMessage}
+    onError={(syntheticEvent) => {
+      const { nativeEvent } = syntheticEvent;
+      console.error('WebView error: ', nativeEvent);
+    }}
+  />
     );
   }
   
@@ -292,8 +306,6 @@ function App(): React.JSX.Element {
 
   return (
     <NavigationContainer>
-
-      
       <Tab.Navigator initialRouteName="Calender" screenOptions={{ tabBarStyle: styles.tabBarStyle }}>
         <Tab.Screen
           name="Calender"
@@ -315,6 +327,18 @@ function App(): React.JSX.Element {
             tabBarIcon: ({ color, size }) => (
               <View style={styles.iconContainer}>
                 <Icon name="article" color={color} size={size} />
+              </View>
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Home"
+          component={MessageScreen}
+          options={{
+            title: '',
+            tabBarIcon: ({ color, size }) => (
+              <View style={styles.iconContainer}>
+                <Icon name="home" color={color} size={size} />
               </View>
             ),
           }}
@@ -364,7 +388,8 @@ const ResponseJsonText = ({json = {}, name}: {json?: object; name: string}) => (
 
 const styles = StyleSheet.create({
   sectionContainer: {
-    marginTop: 32,
+    marginTop: 10,
+    marginBottom: 60,
     paddingHorizontal: 24,
   },
   sectionTitle: {
@@ -411,7 +436,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white, // 색상 설정
   },
   iconContainer: {
-    left: 10,
+    top: 7,
     justifyContent: 'center', // 중앙 정렬
     alignItems: 'center', // 중앙 정렬
   },
