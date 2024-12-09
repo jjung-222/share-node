@@ -129,12 +129,11 @@ function App(): React.JSX.Element {
       // NaverLogin.login() 메서드를 인수 없이 호출
       const response: NaverLoginResponse = await NaverLogin.login();
   
-      console.log('Login response:', response); // 응답 구조 확인
-  
       // 응답의 isSuccess 속성으로 로그인 결과 처리
       if (response.isSuccess) {
         setSuccessResponse(response.successResponse); // 성공한 경우 successResponse를 사용
         setFailureResponse(undefined);
+        await callLoginAPI(response.successResponse && response.successResponse.accessToken);
       } else {
         setFailureResponse(response.failureResponse); // 실패한 경우 failureResponse를 사용
         setSuccessResponse(undefined);
@@ -303,6 +302,48 @@ function App(): React.JSX.Element {
       </View>
     );
   }
+
+  //로그인 api 추가
+  const callLoginAPI = async (accessToken) => { 
+    let profile;
+    try {
+      profile = await NaverLogin.getProfile(accessToken);
+      setGetProfileRes(profile);
+    } catch (e) {
+      console.error('Failed to get profile:', e);
+      setGetProfileRes(undefined);
+    }
+
+    try {
+      const response = await fetch('https://api.sharenode.shop/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}` // 필요하면 Authorization 헤더 사용
+        },
+        body: JSON.stringify({
+          userId: profile && profile.response.id,
+          email: profile && profile.response.email,
+          provider: "naver",
+          token: accessToken, // API에서 요구하는 데이터 형태에 맞춤
+        }),
+      });
+  
+      if (!response.ok) {
+        const errorResponse = await response.text(); // JSON이면 .json()으로 처리
+      console.error('서버 에러 내용:', errorResponse);
+        throw new Error(`API 호출 실패: ${response.status}`);
+      }
+  
+      const result = await response.json();
+      console.log('로그인 API 결과:', result);
+  
+      // 결과에 따라 다음 작업 수행
+      // 예: result.token 저장, 사용자 프로필 업데이트 등
+    } catch (error) {
+      console.error('API 호출 중 오류 발생:', error.message);
+    }
+  };
 
   return (
     <NavigationContainer>
